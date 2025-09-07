@@ -1,3 +1,43 @@
+# Task_1 – Inventory Build Notebook
+
+## Overview
+This notebook cleans and unifies two supplier spreadsheets into a single, tidy inventory dataset. It standardizes column names and units, parses dimensions and steel grades from free text, normalizes finish/quality labels (incl. common German terms), and merges both sources into one canonical schema.
+
+## Inputs
+- `supplier_data1.xlsx`
+- `supplier_data2.xlsx`  
+(Place these in the notebook’s working directory. In Google Colab they are referenced under `/content/`.)
+
+## Output
+- `inventory_dataset.csv` (written by default to `/content/inventory_dataset.csv`)
+
+## Canonical Columns
+`["source", "article_id", "material", "grade", "quality_choice", "finish", "thickness_mm", "width_mm", "weight_kg", "quantity", "rp02", "rm", "ag", "ai", "reserved", "description"]`
+
+## Key Logic
+- Robust number parsing (`coerce_number`) with German decimal comma handling.
+- Finish normalization (`standardize_finish`), e.g. *gebeizt → pickled*, *verzinkt → galvanized*.
+- Quality normalization (`normalize_quality`), mapping 1st/2nd/3rd/4th and German cues.
+- Dimension extraction from text (`parse_dims_from_material`), e.g. `1,50x1250 → thickness/width`.
+- Steel grade extraction (`extract_grade`), e.g. `DX51D`, `S235JR`, `DC01`.
+- Supplier-specific rename maps → canonical schema → row-wise merge.
+
+## How to Run
+1. Open the notebook (e.g., in Google Colab or Jupyter).
+2. Upload `supplier_data1.xlsx` and `supplier_data2.xlsx` (or adjust the file paths in the notebook).
+3. Run all cells. The cleaned inventory is saved as `inventory_dataset.csv`.
+
+## Requirements
+- Python 3.9+  
+- Packages: `pandas`, `numpy`.
+
+---
+*Tip:* If running outside Colab, update the hard-coded `/content/...` paths to local paths before execution.
+
+
+
+
+
 # RFQ Similarity Pipeline (Tasks B.1–B.4)
 
 This repository-style deliverable contains a small, reproducible pipeline to enrich RFQs with grade properties and compute similarity between RFQs.
@@ -28,29 +68,28 @@ This repository-style deliverable contains a small, reproducible pipeline to enr
 
 - **B.4 — Pipeline & documentation**
   - This `run.py` is the end-to-end script.
-  - Results are written to the output directory (defaults to `/mnt/data`).
+  - Results are written to the same directory.
 
 ## Files
 
 - `run.py` – the pipeline script (B.1–B.3).
 - `top3.csv` – results (B.3 output).
 - `rfq_enriched.csv` – intermediate enriched table from B.1 (handy for QA).
-- *(Optional)* `requirements.txt` – if you want to install dependencies explicitly (see below).
 
 ## How to run
 
 From a Python 3.9+ environment with `pandas` and `numpy` installed:
 
-```bash
-python run.py   --rfq /mnt/data/rfq.csv   --reference /mnt/data/reference_properties.tsv   --outdir /mnt/data   --coverage 0.30   --w_dim 0.4 --w_cat 0.2 --w_grade 0.4
+```powershell
+python run.py --rfq .\resources\task_2\rfq.csv --reference .\resources\task_2\reference_properties.tsv --outdir .\outputs --coverage 0.30 --w_dim 0.4 --w_cat 0.2 --w_grade 0.4
 ```
 
 Flags:
 
-- `--rfq` path to the RFQ CSV (default: `/mnt/data/rfq.csv`)
-- `--reference` path to the reference TSV (default: `/mnt/data/reference_properties.tsv`)
-- `--outdir` output directory (default: `/mnt/data`)
-- `--coverage` minimum coverage for grade features (default: `0.30`)
+- `--rfq` path to the RFQ CSV
+- `--reference` path to the reference TSV
+- `--outdir` output directory
+- `--coverage` minimum coverage for grade features 
 - `--w_dim`, `--w_cat`, `--w_grade` weights for the similarity components
 
 Outputs created in `--outdir`:
